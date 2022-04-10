@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /*
  * Copyright (C) 2022, Michał Lach
+ * TODO: implement userspace client
  */
 #include "spoofer.h"
 
-/*
+/* TODO: implement net_device specific filtering
 int reregister_nf_hook(struct net *net, const struct nf_hook_ops *ops)
 {
 	int err = 0;
@@ -17,9 +18,11 @@ int reregister_nf_hook(struct net *net, const struct nf_hook_ops *ops)
 static int filter_show(struct seq_file *file, void *v)
 {
 	unsigned int port = ((struct filter_settings*)v)->port;
+	// TODO: fix endianess related display issues (JUST USE ntohl()!!!)
 	unsigned long ip  = ((struct filter_settings*)v)->ip;
 	char *tcp_dev     = ((struct filter_settings*)v)->tcp_dev;
 	char *udp_dev     = ((struct filter_settings*)v)->udp_dev;
+	// TODO: fix bitmasks
 	if (ip & SPOOFER_NO_ADDRESS_MASK)
 	{
 		seq_puts(file, "ip\t: off\n");
@@ -230,6 +233,7 @@ static unsigned int netfilter_hook_handler(void *priv, struct sk_buff *skb,
 	iph = ip_hdr(skb);
 	spin_lock_irqsave(&settings_lock, flags);
 
+	// TODO: make filter address the settings
 	if (iph->protocol == IPPROTO_UDP) {
 		udph = udp_hdr(skb);
 		// if (settings.ip & SPOOFER_NO_ADDRESS_MASK)
@@ -238,10 +242,11 @@ static unsigned int netfilter_hook_handler(void *priv, struct sk_buff *skb,
 		// 	goto no_filtering;
 
 		iph->saddr = (int)settings.ip;
-		iph->check = ip_fast_csum(iph, iph->tot_len >> 1);
 	} else if (iph->protocol == IPPROTO_TCP) {
+		// TODO: implement tcp filtering
 		tcph = tcp_hdr(skb);
 	}
+	iph->check = ip_fast_csum(iph, iph->tot_len >> 1);
 
 no_filtering:
 	spin_unlock_irqrestore(&settings_lock, flags);
