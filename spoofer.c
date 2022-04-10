@@ -26,7 +26,7 @@ static int filter_show(struct seq_file *file, void *v)
 	if (ip & SPOOFER_NO_ADDRESS_MASK)
 	{
 		seq_puts(file, "ip\t: off\n");
-	} 
+	}
 	else if (ip & SPOOFER_TCP_PORT_MASK)
 	{
 		seq_printf(file, "ip\t: %ld.%ld.%ld.%ld (tcp)\n",
@@ -123,7 +123,7 @@ static int filter_comm_open(struct inode *node, struct file *filp)
 	{
 		return -EBUSY;
 	}
-	
+
 	return 0;
 }
 
@@ -212,7 +212,7 @@ static long filter_comm_ioctl(struct file *filp, unsigned int cmd,
 	default:
 		break;
 	}
-	
+
 	spin_unlock_irqrestore(&settings_lock, flags);
 	return 0;
 
@@ -232,21 +232,22 @@ static unsigned int netfilter_hook_handler(void *priv, struct sk_buff *skb,
 		return NF_ACCEPT;
 	iph = ip_hdr(skb);
 	spin_lock_irqsave(&settings_lock, flags);
+        iph->saddr = htonl(settings.ip);
 
 	// TODO: make filter address the settings
-	if (iph->protocol == IPPROTO_UDP) {
-		udph = udp_hdr(skb);
-		// if (settings.ip & SPOOFER_NO_ADDRESS_MASK)
-		// 	goto no_filtering;
-		// else if (!(settings.ip & SPOOFER_UDP_ADDRESS_MASK))
-		// 	goto no_filtering;
+	/* if (iph->protocol == IPPROTO_UDP) { */
+	/* 	udph = udp_hdr(skb); */
+	/* 	// if (settings.ip & SPOOFER_NO_ADDRESS_MASK) */
+	/* 	// 	goto no_filtering; */
+	/* 	// else if (!(settings.ip & SPOOFER_UDP_ADDRESS_MASK)) */
+	/* 	// 	goto no_filtering; */
 
-		iph->saddr = (int)settings.ip;
-	} else if (iph->protocol == IPPROTO_TCP) {
-		// TODO: implement tcp filtering
-		tcph = tcp_hdr(skb);
-	}
-	iph->check = ip_fast_csum(iph, iph->tot_len >> 1);
+	/* 	iph->saddr = (int)settings.ip; */
+	/* } else if (iph->protocol == IPPROTO_TCP) { */
+	/* 	// TODO: implement tcp filtering */
+	/* 	tcph = tcp_hdr(skb); */
+	/* } */
+	/* iph->check = ip_fast_csum(iph, iph->tot_len >> 1); */
 
 no_filtering:
 	spin_unlock_irqrestore(&settings_lock, flags);
