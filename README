@@ -1,0 +1,3 @@
+this driver is unfinished, however it already provides a basic stack with user
+configuration for egress traffic filtering AND spoofing source addresses and
+ports.
